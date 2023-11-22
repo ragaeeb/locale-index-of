@@ -1,0 +1,25 @@
+{
+    "env": {
+        "node": true,
+        "es2022": true,
+        "jest": true
+    },
+    "extends": ["prettier", "airbnb-base", "eslint-config-prettier"],
+    "plugins": ["prettier", "simple-import-sort"],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2023
+    },
+    "rules": {
+        "import/prefer-default-export": 0,
+        "prettier/prettier": "error",
+        "no-console": 0,
+        "simple-import-sort/imports": "error",
+        "simple-import-sort/exports": "error",
+        "no-plusplus": "off",
+        "radix": "off"
+    }
+}
