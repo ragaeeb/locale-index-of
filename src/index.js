@@ -19,10 +19,13 @@ const getCollator = (localesOrCollator, options) => {
 const getContext = (collator, options) => {
     const { ignorePunctuation, locale } = collator.resolvedOptions();
 
-    const isConsidered = (grapheme) =>
+    const isConsidered = (grapheme) => {
         // Check against both punctuation and numbers
-        (!options.ignoreNumbers || !/\d/.test(grapheme)) &&
-        (!ignorePunctuation || collator.compare('a', `a${grapheme}`) !== 0);
+        return (
+            (!options.ignoreNumbers || !/\d/.test(grapheme)) &&
+            (!ignorePunctuation || collator.compare('a', `a${grapheme}`) !== 0)
+        );
+    };
 
     const segmenter = new Intl.Segmenter(locale, { granularity: 'grapheme' });
 
@@ -86,19 +89,14 @@ function* makeSlicesGenerator(collator, string, substring, options = {}) {
  */
 export const indexOf = (collator, string, substring, options) => {
     const slicesGenerator = makeSlicesGenerator(collator, string, substring, options);
-    const slices = [];
 
     // eslint-disable-next-line no-restricted-syntax
-    for (const s of slicesGenerator) {
-        slices.push(s);
-    }
-
-    for (let i = 0; i < slices.length; i++) {
-        const { index, slice } = slices[i];
+    for (const { index, slice } of slicesGenerator) {
         if (collator.compare(slice, substring) === 0) {
             return { index, match: slice };
         }
     }
+
     return null;
 };
 
