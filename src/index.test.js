@@ -7,7 +7,7 @@ describe('index', () => {
     let options;
 
     beforeAll(() => {
-        localeIndexOf = localeIndexOfMaker(Intl);
+        localeIndexOf = localeIndexOfMaker();
     });
 
     describe('localeIndexOf', () => {

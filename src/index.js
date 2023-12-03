@@ -1,12 +1,11 @@
 /**
  * Retrieves an Intl.Collator instance.
  *
- * @param {typeof globalThis.Intl} Intl - The global Intl object.
  * @param {string | string[] | Intl.Collator} localesOrCollator - A locale string, an array of locale strings, or an existing Intl.Collator instance.
  * @param {Intl.CollatorOptions} [options] - Options for Intl.Collator.
  * @returns {Intl.Collator} An Intl.Collator instance.
  */
-const getCollator = (Intl, localesOrCollator, options) => {
+const getCollator = (localesOrCollator, options) => {
     if (localesOrCollator && localesOrCollator instanceof Intl.Collator) {
         return localesOrCollator;
     }
@@ -41,13 +40,12 @@ const getContext = (collator, options) => {
 /**
  * Generator function to create slices of a string for searching a substring.
  *
- * @param {typeof globalThis.Intl} Intl - The global Intl object.
  * @param {Intl.Collator} collator - An Intl.Collator instance for locale-specific comparison.
  * @param {string} string - The string to be searched.
  * @param {string} substring - The substring to search for.
  * @yields {{ index: number, slice: string }} An object containing the index of the slice and the slice itself.
  */
-function* makeSlicesGenerator(Intl, collator, string, substring, options = {}) {
+function* makeSlicesGenerator(collator, string, substring, options = {}) {
     const { segmenter, isConsidered, countOfConsideredGraphemes } = getContext(collator, options);
 
     const substringGraphemes = [];
@@ -100,8 +98,8 @@ function* makeSlicesGenerator(Intl, collator, string, substring, options = {}) {
  * @param {string} substring - The substring to search for.
  * @returns {{ index: number, match: string | null }} An object containing the index of the first occurrence of the substring and the matched substring. If no match is found, returns index as -1 and match as null.
  */
-export const indexOf = (Intl, collator, string, substring, options) => {
-    const slicesGenerator = makeSlicesGenerator(Intl, collator, string, substring, options);
+export const indexOf = (collator, string, substring, options) => {
+    const slicesGenerator = makeSlicesGenerator(collator, string, substring, options);
     const slices = [];
 
     // eslint-disable-next-line no-restricted-syntax
@@ -128,9 +126,9 @@ export const indexOf = (Intl, collator, string, substring, options) => {
  * @param {Intl.CollatorOptions} [options] - Options for Intl.Collator.
  * @returns {{ index: number, match: string | null }} An object containing the index of the first occurrence of the substring and the matched substring. If no match is found, returns index as -1 and match as null.
  */
-const functional = (Intl, string, substring, localesOrCollator, { ignoreNumbers, ...collatorOptions } = {}) => {
-    const collator = getCollator(Intl, localesOrCollator, collatorOptions);
-    return indexOf(Intl, collator, string, substring, ignoreNumbers && { ignoreNumbers });
+const functional = (string, substring, localesOrCollator, { ignoreNumbers, ...collatorOptions } = {}) => {
+    const collator = getCollator(localesOrCollator, collatorOptions);
+    return indexOf(collator, string, substring, ignoreNumbers && { ignoreNumbers });
 };
 
 /**
@@ -139,6 +137,6 @@ const functional = (Intl, string, substring, localesOrCollator, { ignoreNumbers,
  * @param {typeof globalThis.Intl} Intl - The global Intl object.
  * @returns {Function} A function that takes a string, a substring, optional locale or collator, and options, and returns an object with the index of the first occurrence of the substring and the matched substring. If no match is found, returns index as -1 and match as null.
  */
-export default (Intl) => (string, substring, localesOrCollator, options) => {
-    return functional(Intl, string, substring, localesOrCollator, options);
+export default () => (string, substring, localesOrCollator, options) => {
+    return functional(string, substring, localesOrCollator, options);
 };
