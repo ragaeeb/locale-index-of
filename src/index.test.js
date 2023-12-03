@@ -33,7 +33,7 @@ describe('index', () => {
             });
 
             it('should return -1 for no match', () => {
-                expect(localeIndexOf('äbc', 'bd')).toEqual({ index: -1, match: null });
+                expect(localeIndexOf('äbc', 'bd')).toBeNull();
             });
         });
 
@@ -55,7 +55,7 @@ describe('index', () => {
             });
 
             it('should handle decomposed substring: no match', () => {
-                expect(localeIndexOf('cf\u00e9', 'caf\u0065\u0301')).toEqual({ index: -1, match: null });
+                expect(localeIndexOf('cf\u00e9', 'caf\u0065\u0301')).toBeNull();
             });
 
             it('should handle decomposed both: same strings', () => {
@@ -87,7 +87,7 @@ describe('index', () => {
             });
 
             it('should handle decomposed both: no match', () => {
-                expect(localeIndexOf('cf\u0065\u0301', 'caf\u0065\u0301')).toEqual({ index: -1, match: null });
+                expect(localeIndexOf('cf\u0065\u0301', 'caf\u0065\u0301')).toBeNull();
             });
 
             it('should handle decomposed string: same strings', () => {
@@ -107,7 +107,7 @@ describe('index', () => {
             });
 
             it('should handle decomposed string: no match', () => {
-                expect(localeIndexOf('cf\u0065\u0301', 'caf\u00e9')).toEqual({ index: -1, match: null });
+                expect(localeIndexOf('cf\u0065\u0301', 'caf\u00e9')).toBeNull();
             });
 
             it('should return string index, not grapheme index', () => {
@@ -124,25 +124,19 @@ describe('index', () => {
             });
 
             it('should not match in en with sensitivity: variant', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'en', { sensitivity: 'variant' })).toEqual({
-                    match: null,
-                    index: -1,
-                });
+                expect(localeIndexOf('here is ä for you', 'a', 'en', { sensitivity: 'variant' })).toBeNull();
             });
 
             it('should not match in de with sensitivity: variant', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'de', { sensitivity: 'variant' })).toEqual({
-                    match: null,
-                    index: -1,
-                });
+                expect(localeIndexOf('here is ä for you', 'a', 'de', { sensitivity: 'variant' })).toBeNull();
             });
 
             it('should not match in en with another letter', () => {
-                expect(localeIndexOf('here is b for you', 'a', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is b for you', 'a', 'en', options)).toBeNull();
             });
 
             it('should not match in de with another letter', () => {
-                expect(localeIndexOf('here is b for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is b for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should find ä in en when searching for a', () => {
@@ -150,7 +144,7 @@ describe('index', () => {
             });
 
             it('should not find ä in de when searching for a', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is ä for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should find a in en when searching for ä', () => {
@@ -158,7 +152,7 @@ describe('index', () => {
             });
 
             it('should not find a in de when searching for ä', () => {
-                expect(localeIndexOf('here is a for you', 'ä', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'ä', 'de', options)).toBeNull();
             });
 
             it('should find A in en when searching for a', () => {
@@ -184,41 +178,35 @@ describe('index', () => {
             });
 
             it('should not match in en with sensitivity: variant', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'en', { sensitivity: 'variant' })).toEqual({
-                    match: null,
-                    index: -1,
-                });
+                expect(localeIndexOf('here is ä for you', 'a', 'en', { sensitivity: 'variant' })).toBeNull();
             });
 
             it('should not match in de with sensitivity: variant', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'de', { sensitivity: 'variant' })).toEqual({
-                    match: null,
-                    index: -1,
-                });
+                expect(localeIndexOf('here is ä for you', 'a', 'de', { sensitivity: 'variant' })).toBeNull();
             });
 
             it('should not match in en with another letter', () => {
-                expect(localeIndexOf('here is b for you', 'a', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is b for you', 'a', 'en', options)).toBeNull();
             });
 
             it('should not match in de with another letter', () => {
-                expect(localeIndexOf('here is b for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is b for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should not find ä in en when searching for a', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is ä for you', 'a', 'en', options)).toBeNull();
             });
 
             it('should not find ä in de when searching for a', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is ä for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should not find a in en when searching for ä', () => {
-                expect(localeIndexOf('here is a for you', 'ä', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'ä', 'en', options)).toBeNull();
             });
 
             it('should not find a in de when searching for ä', () => {
-                expect(localeIndexOf('here is a for you', 'ä', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'ä', 'de', options)).toBeNull();
             });
 
             it('should find A in en when searching for a', () => {
@@ -244,25 +232,19 @@ describe('index', () => {
             });
 
             it('should not match in en with sensitivity: variant', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'en', { sensitivity: 'variant' })).toEqual({
-                    match: null,
-                    index: -1,
-                });
+                expect(localeIndexOf('here is ä for you', 'a', 'en', { sensitivity: 'variant' })).toBeNull();
             });
 
             it('should not match in de with sensitivity: variant', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'de', { sensitivity: 'variant' })).toEqual({
-                    match: null,
-                    index: -1,
-                });
+                expect(localeIndexOf('here is ä for you', 'a', 'de', { sensitivity: 'variant' })).toBeNull();
             });
 
             it('should not match in en with another letter', () => {
-                expect(localeIndexOf('here is b for you', 'a', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is b for you', 'a', 'en', options)).toBeNull();
             });
 
             it('should not match in de with another letter', () => {
-                expect(localeIndexOf('here is b for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is b for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should find ä in en when searching for a', () => {
@@ -270,7 +252,7 @@ describe('index', () => {
             });
 
             it('should not find ä in de when searching for a', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is ä for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should find a in en when searching for ä', () => {
@@ -278,23 +260,23 @@ describe('index', () => {
             });
 
             it('should not find a in de when searching for ä', () => {
-                expect(localeIndexOf('here is a for you', 'ä', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'ä', 'de', options)).toBeNull();
             });
 
             it('should not find A in en when searching for a', () => {
-                expect(localeIndexOf('here is A for you', 'a', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is A for you', 'a', 'en', options)).toBeNull();
             });
 
             it('should not find A in de when searching for a', () => {
-                expect(localeIndexOf('here is A for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is A for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should not find a in en when searching for A', () => {
-                expect(localeIndexOf('here is a for you', 'A', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'A', 'en', options)).toBeNull();
             });
 
             it('should not find a in de when searching for A', () => {
-                expect(localeIndexOf('here is a for you', 'A', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'A', 'de', options)).toBeNull();
             });
         });
 
@@ -312,43 +294,43 @@ describe('index', () => {
             });
 
             it('should not match in en with another letter', () => {
-                expect(localeIndexOf('here is b for you', 'a', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is b for you', 'a', 'en', options)).toBeNull();
             });
 
             it('should not match in de with another letter', () => {
-                expect(localeIndexOf('here is b for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is b for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should not find ä in en when searching for a', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is ä for you', 'a', 'en', options)).toBeNull();
             });
 
             it('should not find ä in de when searching for a', () => {
-                expect(localeIndexOf('here is ä for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is ä for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should not find a in en when searching for ä', () => {
-                expect(localeIndexOf('here is a for you', 'ä', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'ä', 'en', options)).toBeNull();
             });
 
             it('should not find a in de when searching for ä', () => {
-                expect(localeIndexOf('here is a for you', 'ä', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'ä', 'de', options)).toBeNull();
             });
 
             it('should not find A in en when searching for a', () => {
-                expect(localeIndexOf('here is A for you', 'a', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is A for you', 'a', 'en', options)).toBeNull();
             });
 
             it('should not find A in de when searching for a', () => {
-                expect(localeIndexOf('here is A for you', 'a', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is A for you', 'a', 'de', options)).toBeNull();
             });
 
             it('should not find a in en when searching for A', () => {
-                expect(localeIndexOf('here is a for you', 'A', 'en', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'A', 'en', options)).toBeNull();
             });
 
             it('should not find a in de when searching for A', () => {
-                expect(localeIndexOf('here is a for you', 'A', 'de', options)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is a for you', 'A', 'de', options)).toBeNull();
             });
         });
 
@@ -360,7 +342,7 @@ describe('index', () => {
 
             it('should not find ä in de when searching for a with a specific collator', () => {
                 const collatorDE = new Intl.Collator('de', { sensitivity: 'base', usage: 'search' });
-                expect(localeIndexOf('here is ä for you', 'a', collatorDE)).toEqual({ match: null, index: -1 });
+                expect(localeIndexOf('here is ä for you', 'a', collatorDE)).toBeNull();
             });
         });
 
