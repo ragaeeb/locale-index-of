@@ -19,14 +19,6 @@ const getCollator = (localesOrCollator, options) => {
 const getContext = (collator, options) => {
     const { ignorePunctuation, locale } = collator.resolvedOptions();
 
-    const countOfConsideredGraphemes = (graphemes) => {
-        if (ignorePunctuation) {
-            return graphemes.filter(({ considered }) => considered).length;
-        }
-
-        return graphemes.length;
-    };
-
     const isConsidered = (grapheme) =>
         // Check against both punctuation and numbers
         (!options.ignoreNumbers || !/\d/.test(grapheme)) &&
@@ -34,7 +26,20 @@ const getContext = (collator, options) => {
 
     const segmenter = new Intl.Segmenter(locale, { granularity: 'grapheme' });
 
-    return { isConsidered, segmenter, countOfConsideredGraphemes };
+    return { isConsidered, segmenter };
+};
+
+const filterConsideredSegments = (segmenter, isConsidered, text) => {
+    const result = [];
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const s of segmenter.segment(text)) {
+        if (isConsidered(s.segment)) {
+            result.push(s);
+        }
+    }
+
+    return result;
 };
 
 /**
@@ -46,45 +51,26 @@ const getContext = (collator, options) => {
  * @yields {{ index: number, slice: string }} An object containing the index of the slice and the slice itself.
  */
 function* makeSlicesGenerator(collator, string, substring, options = {}) {
-    const { segmenter, isConsidered, countOfConsideredGraphemes } = getContext(collator, options);
+    const { segmenter, isConsidered } = getContext(collator, options);
 
-    const substringGraphemes = [];
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const s of segmenter.segment(substring)) {
-        if (isConsidered(s.segment)) {
-            substringGraphemes.push(s.segment);
-        }
-    }
-
+    const substringGraphemes = filterConsideredSegments(segmenter, isConsidered, substring);
+    const stringSegments = filterConsideredSegments(segmenter, isConsidered, string);
     const sliceArray = [];
-    const stringSegments = [];
-
-    // Adjusted to filter segments for comparison, but keep track of original index and segment
-    // eslint-disable-next-line no-restricted-syntax
-    for (const s of segmenter.segment(string)) {
-        stringSegments.push({ considered: isConsidered(s.segment), index: s.index, segment: s.segment });
-    }
 
     for (let i = 0; i < stringSegments.length; i++) {
-        const grapheme = stringSegments[i];
+        sliceArray.push(stringSegments[i]);
 
-        // Only push considered graphemes to sliceArray
-        if (grapheme.considered) {
-            sliceArray.push(grapheme);
+        // Check if the sliceArray is full (according to the length of considered graphemes in the substring)
+        if (sliceArray.length === substringGraphemes.length) {
+            const slice = sliceArray.map((s) => s.segment).join('');
 
-            // Check if the sliceArray is full (according to the length of considered graphemes in the substring)
-            if (countOfConsideredGraphemes(sliceArray) === substringGraphemes.length) {
-                const slice = sliceArray.map(({ segment }) => segment).join('');
-
-                // Yield the slice if it matches the substring
-                if (collator.compare(slice, substring) === 0) {
-                    yield { index: sliceArray[0].index, slice };
-                }
-
-                // Remove the first element to make room for the next grapheme
-                sliceArray.shift();
+            // Yield the slice if it matches the substring
+            if (collator.compare(slice, substring) === 0) {
+                yield { index: sliceArray[0].index, slice };
             }
+
+            // Remove the first element to make room for the next grapheme
+            sliceArray.shift();
         }
     }
 }
