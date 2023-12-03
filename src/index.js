@@ -17,12 +17,25 @@ const getCollator = (Intl, localesOrCollator, options) => {
     });
 };
 
-const countOfConsideredGraphemes = (graphemes, ignorePunctuation) => {
-    if (ignorePunctuation) {
-        return graphemes.filter(({ considered }) => considered).length;
-    }
+const getContext = (collator, options) => {
+    const { ignorePunctuation, locale } = collator.resolvedOptions();
 
-    return graphemes.length;
+    const countOfConsideredGraphemes = (graphemes) => {
+        if (ignorePunctuation) {
+            return graphemes.filter(({ considered }) => considered).length;
+        }
+
+        return graphemes.length;
+    };
+
+    const isConsidered = (grapheme) =>
+        // Check against both punctuation and numbers
+        (!options.ignoreNumbers || !/\d/.test(grapheme)) &&
+        (!ignorePunctuation || collator.compare('a', `a${grapheme}`) !== 0);
+
+    const segmenter = new Intl.Segmenter(locale, { granularity: 'grapheme' });
+
+    return { isConsidered, segmenter, countOfConsideredGraphemes };
 };
 
 /**
@@ -35,14 +48,7 @@ const countOfConsideredGraphemes = (graphemes, ignorePunctuation) => {
  * @yields {{ index: number, slice: string }} An object containing the index of the slice and the slice itself.
  */
 function* makeSlicesGenerator(Intl, collator, string, substring, options = {}) {
-    const { ignorePunctuation, locale } = collator.resolvedOptions();
-
-    const isConsidered = (grapheme) =>
-        // Check against both punctuation and numbers
-        (!options.ignoreNumbers || !/\d/.test(grapheme)) &&
-        (!ignorePunctuation || collator.compare('a', `a${grapheme}`) !== 0);
-
-    const segmenter = new Intl.Segmenter(locale, { granularity: 'grapheme' });
+    const { segmenter, isConsidered, countOfConsideredGraphemes } = getContext(collator, options);
 
     const substringGraphemes = [];
 
@@ -70,7 +76,7 @@ function* makeSlicesGenerator(Intl, collator, string, substring, options = {}) {
             sliceArray.push(grapheme);
 
             // Check if the sliceArray is full (according to the length of considered graphemes in the substring)
-            if (countOfConsideredGraphemes(sliceArray, ignorePunctuation) === substringGraphemes.length) {
+            if (countOfConsideredGraphemes(sliceArray) === substringGraphemes.length) {
                 const slice = sliceArray.map(({ segment }) => segment).join('');
 
                 // Yield the slice if it matches the substring
