@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 
-import localeIndexOfMaker from './index';
+import localeIndexOfMaker, { getHaystackContext, getMatches } from './index';
 
 describe('index', () => {
     let localeIndexOf;
@@ -392,6 +392,17 @@ describe('index', () => {
                 });
                 // this is not exactly what we want, but it's good enough for now
                 expect(result).toEqual({ index: 0, match: 'ثُمَّلَمْيَحْسِمْهُمأَخْرَجَهُ' });
+            });
+        });
+
+        describe('getMatches', () => {
+            it('should get all the matches', () => {
+                const context = getHaystackContext('The quick brown fox jumps right over the lazy dog', 'en');
+                const actual = getMatches(context, ['quick', 'fox']);
+                expect(actual).toEqual([
+                    { index: 4, match: 'quick' },
+                    { index: 16, match: 'fox' },
+                ]);
             });
         });
 

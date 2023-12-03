@@ -16,22 +16,6 @@ const getCollator = (localesOrCollator, options) => {
     });
 };
 
-const getContext = (collator, options) => {
-    const { ignorePunctuation, locale } = collator.resolvedOptions();
-
-    const isConsidered = (grapheme) => {
-        // Check against both punctuation and numbers
-        return (
-            (!options.ignoreNumbers || !/\d/.test(grapheme)) &&
-            (!ignorePunctuation || collator.compare('a', `a${grapheme}`) !== 0)
-        );
-    };
-
-    const segmenter = new Intl.Segmenter(locale, { granularity: 'grapheme' });
-
-    return { isConsidered, segmenter };
-};
-
 const filterConsideredSegments = (segmenter, isConsidered, text) => {
     const result = [];
 
@@ -45,6 +29,26 @@ const filterConsideredSegments = (segmenter, isConsidered, text) => {
     return result;
 };
 
+const getContext = (collator, options) => {
+    const { ignorePunctuation, locale } = collator.resolvedOptions();
+
+    const isConsidered = (grapheme) => {
+        // Check against both punctuation and numbers
+        return (
+            (!options.ignoreNumbers || !/\d/.test(grapheme)) &&
+            (!ignorePunctuation || collator.compare('a', `a${grapheme}`) !== 0)
+        );
+    };
+
+    const segmenter = new Intl.Segmenter(locale, { granularity: 'grapheme' });
+
+    return {
+        isConsidered,
+        segmenter,
+        collator,
+    };
+};
+
 /**
  * Generator function to create slices of a string for searching a substring.
  *
@@ -53,11 +57,8 @@ const filterConsideredSegments = (segmenter, isConsidered, text) => {
  * @param {string} substring - The substring to search for.
  * @yields {{ index: number, slice: string }} An object containing the index of the slice and the slice itself.
  */
-function* makeSlicesGenerator(collator, string, substring, options = {}) {
-    const { segmenter, isConsidered } = getContext(collator, options);
-
-    const substringGraphemes = filterConsideredSegments(segmenter, isConsidered, substring);
-    const stringSegments = filterConsideredSegments(segmenter, isConsidered, string);
+function* makeSlicesGenerator(context, stringSegments, substring) {
+    const substringGraphemes = filterConsideredSegments(context.segmenter, context.isConsidered, substring);
     const sliceArray = [];
 
     for (let i = 0; i < stringSegments.length; i++) {
@@ -65,11 +66,11 @@ function* makeSlicesGenerator(collator, string, substring, options = {}) {
 
         // Check if the sliceArray is full (according to the length of considered graphemes in the substring)
         if (sliceArray.length === substringGraphemes.length) {
-            const slice = sliceArray.map((s) => s.segment).join('');
+            const match = sliceArray.map((s) => s.segment).join('');
 
             // Yield the slice if it matches the substring
-            if (collator.compare(slice, substring) === 0) {
-                yield { index: sliceArray[0].index, slice };
+            if (context.collator.compare(match, substring) === 0) {
+                yield { index: sliceArray[0].index, match };
             }
 
             // Remove the first element to make room for the next grapheme
@@ -77,6 +78,19 @@ function* makeSlicesGenerator(collator, string, substring, options = {}) {
         }
     }
 }
+
+const getMatch = (context, segments, needle) => {
+    const slicesGenerator = makeSlicesGenerator(context, segments, needle);
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const s of slicesGenerator) {
+        if (s) {
+            return s;
+        }
+    }
+
+    return null;
+};
 
 /**
  * Finds the index of a substring in a string according to locale-specific rules.
@@ -87,23 +101,38 @@ function* makeSlicesGenerator(collator, string, substring, options = {}) {
  * @param {string} substring - The substring to search for.
  * @returns {{ index: number, match: string | null }} An object containing the index of the first occurrence of the substring and the matched substring. If no match is found, returns index as -1 and match as null.
  */
-export const indexOf = (collator, string, substring, options) => {
-    const slicesGenerator = makeSlicesGenerator(collator, string, substring, options);
+const indexOf = (collator, string, substring, options = {}) => {
+    const context = getContext(collator, options);
+    const segments = filterConsideredSegments(context.segmenter, context.isConsidered, string);
 
-    // eslint-disable-next-line no-restricted-syntax
-    for (const { index, slice } of slicesGenerator) {
-        if (collator.compare(slice, substring) === 0) {
-            return { index, match: slice };
+    return getMatch(context, segments, substring);
+};
+
+export const getHaystackContext = (haystack, localesOrCollator, { ignoreNumbers, ...collatorOptions } = {}) => {
+    const collator = getCollator(localesOrCollator, collatorOptions);
+    const context = getContext(collator, { ignoreNumbers });
+    const segments = filterConsideredSegments(context.segmenter, context.isConsidered, haystack);
+
+    return { ...context, segments };
+};
+
+export const getMatches = ({ segments, ...context }, needles) => {
+    const matches = [];
+
+    for (let i = 0; i < needles.length; i++) {
+        const match = getMatch(context, segments, needles[i]);
+
+        if (match) {
+            matches.push(match);
         }
     }
 
-    return null;
+    return matches;
 };
 
 /**
  * Functional wrapper for searching a substring in a string using locale-specific comparison.
  *
- * @param {typeof globalThis.Intl} Intl - The global Intl object.
  * @param {string} string - The string to be searched.
  * @param {string} substring - The substring to search for.
  * @param {string | string[] | Intl.Collator} localesOrCollator - A locale string, an array of locale strings, or an existing Intl.Collator instance.
