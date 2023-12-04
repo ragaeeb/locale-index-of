@@ -121,10 +121,7 @@ export const getMatches = ({ segments, ...context }, needles) => {
 
     for (let i = 0; i < needles.length; i++) {
         const match = getMatch(context, segments, needles[i]);
-
-        if (match) {
-            matches.push(match);
-        }
+        matches.push(match);
     }
 
     return matches;

@@ -398,11 +398,8 @@ describe('index', () => {
         describe('getMatches', () => {
             it('should get all the matches', () => {
                 const context = getHaystackContext('The quick brown fox jumps right over the lazy dog', 'en');
-                const actual = getMatches(context, ['quick', 'fox']);
-                expect(actual).toEqual([
-                    { index: 4, match: 'quick' },
-                    { index: 16, match: 'fox' },
-                ]);
+                const actual = getMatches(context, ['quick', 'fox', 'boom']);
+                expect(actual).toEqual([{ index: 4, match: 'quick' }, { index: 16, match: 'fox' }, null]);
             });
         });
 
