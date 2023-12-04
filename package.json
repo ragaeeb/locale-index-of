@@ -1,6 +1,6 @@
 {
     "name": "@ragaeeb/locale-index-of",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "description": "A locale-aware Intl-powered version of indexOf.",
     "main": "dist/main.js",
     "files": [
